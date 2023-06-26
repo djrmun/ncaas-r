@@ -1,0 +1,679 @@
+openapi: 3.0.0
+x-stoplight:
+  id: ju10ldzsr6bif
+info:
+  contact:
+    name: dj457m
+  title: NcaaS-Turnup
+  description: NCaaS-R turn-up broker
+  version: '1.0'
+servers:
+  - url: 'http://localhost:8080'
+tags:
+  - name: turnup
+    description: Turnup APIs
+paths:
+  '/v1/turnup/isavailable/{tid}':
+    parameters:
+      - schema:
+          type: string
+        name: tid
+        in: path
+        required: true
+        description: complex system name
+    get:
+      summary: Assess checkout availability of complex
+      tags:
+        - turnup
+      responses:
+        '200':
+          description: OK - response contains complex availability status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplexAvailability'
+              examples:
+                Get complex availability for TID MRTTGAMAOL003033838Z:
+                  value:
+                    device_ready: false
+                    ready_status: not_ready
+                    not_ready_reasons:
+                      - 'Existing NCaaS-R Checkout - The ''MRTTGAMAOL003033838Z'' Ciena Complex was checked out by lr3921 on May 23 2023 10:56AM (Central Time).  Additionally, this site was checked in (completed) on May 23 2023'
+                      - 'OLT turn-up count discrepancy detected: Labrador has 8 complex OLTs inventoried, Granite has 8 complex OLTs inventoried and the TOR-A ''Ciena OLT Add Qty'' field in Granite indicates there should be 0 OLTs turned up'
+                      - All 'Pending Add' circuit paths between the TOR and BNG must have an associated LSC Work Order
+                      - 'All Ciena Complex devices in build must be at the ''Basset (NCaaS-R) Completion'' step and cannot be ''On Hold'', found these ticket types: IP Request'
+                      - 'All devices in the Ciena Complex must have an IPv6 IP, these do not: MRTTGAMAOL0030338381, MRTTGAMAOL0030338382, MRTTGAMAOL0030338383, MRTTGAMAOL0030338384, MRTTGAMAOL0030338385, MRTTGAMAOL0030338386, MRTTGAMAOL0030338387, MRTTGAMAOL0030338388, MRTTGAMAOL003033838A, MRTTGAMAOL003033838B'
+                      - 'All 5164 OLTs in the Ciena Complex must have an IPv4 IP, these do not: MRTTGAMAOL0030338381, MRTTGAMAOL0030338382, MRTTGAMAOL0030338383, MRTTGAMAOL0030338384, MRTTGAMAOL0030338385, MRTTGAMAOL0030338386, MRTTGAMAOL0030338387, MRTTGAMAOL0030338388'
+      operationId: is-available
+      description: Validate device complex availablity and retrieve complex details
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: NCAAS-TURNUP-AFFINITY
+          description: dynamic upstream affinity selector
+  '/v1/turnup/details/{tid}':
+    get:
+      summary: Get complex details
+      tags:
+        - turnup
+      operationId: get-complex-details
+      description: Retrieve the complex details given a TID
+      responses:
+        '200':
+          description: OK - response contains complex details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplexDetails'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: NCAAS-TURNUP-AFFINITY
+          description: dynamic upstream affinity selector
+    parameters:
+      - schema:
+          type: string
+        name: tid
+        in: path
+        required: true
+        description: device complex id
+  '/v1/turnup/checkout/{tid}':
+    put:
+      summary: Checkout complex
+      tags:
+        - turnup
+      operationId: checkout-complex
+      responses:
+        '200':
+          description: checkout OK
+        '409':
+          description: Check-out cannot be accommodated due to availability failure
+      description: Establishes checkout lock for further operations
+      parameters:
+        - schema:
+            type: string
+          in: header
+          description: dynamic upstream affinity selector
+          name: NCAAS-TURNUP-AFFINITY
+    parameters:
+      - schema:
+          type: string
+        name: tid
+        in: path
+        required: true
+        description: device name
+  '/v1/turnup/checkin/{tid}':
+    put:
+      summary: Checkin complex
+      tags:
+        - turnup
+      operationId: checkin-complex
+      responses:
+        '200':
+          description: check-in ok
+        '409':
+          description: If the complex is not currently checked out
+      description: End the checkout lock and make device complex available to future other checkouts
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: NCAAS-TURNUP-AFFINITY
+          description: dynamic upstream affinity selector
+    parameters:
+      - schema:
+          type: string
+        name: tid
+        in: path
+        required: true
+        description: device name
+  '/v1/turnup/generate/{tid}/{devicetype}/{configtype}':
+    get:
+      summary: Generate config
+      tags:
+        - turnup
+      responses:
+        '200':
+          description: Generated configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+      operationId: generate-config
+      description: 'Generate configuration given device name, device type, and config type'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          description: dynamic upstream affinity selector
+          name: NCAAS-TURNUP-AFFINITY
+    parameters:
+      - schema:
+          type: string
+        name: tid
+        in: path
+        required: true
+        description: device name
+      - schema:
+          type: string
+        name: devicetype
+        in: path
+        required: true
+        description: device type
+      - schema:
+          type: string
+        name: configtype
+        in: path
+        required: true
+        description: config type
+  '/v1/turnup/generate/{tid}':
+    parameters:
+      - schema:
+          type: string
+        name: tid
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags:
+        - turnup
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplexConfigs'
+      operationId: generate-configs
+      description: Generate all configurations for all device-type / config-type for a given device.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: NCAAS-TURNUP-AFFINITY
+          description: dynamic upstream affinity selector
+components:
+  schemas:
+    ComplexAvailability:
+      type: object
+      properties:
+        device_ready:
+          type: boolean
+        ready_status:
+          type: string
+        not_ready_reasons:
+          type: array
+          items:
+            type: string
+      x-examples:
+        Example 1:
+          device_ready: false
+          ready_status: not_ready
+          not_ready_reasons:
+            - 'Existing NCaaS-R Checkout - The ''MRTTGAMAOL003033838Z'' Ciena Complex was checked out by lr3921 on May 23 2023 10:56AM (Central Time).  Additionally, this site was checked in (completed) on May 23 2023'
+            - 'OLT turn-up count discrepancy detected: Labrador has 8 complex OLTs inventoried, Granite has 8 complex OLTs inventoried and the TOR-A ''Ciena OLT Add Qty'' field in Granite indicates there should be 0 OLTs turned up'
+            - All 'Pending Add' circuit paths between the TOR and BNG must have an associated LSC Work Order
+            - 'All Ciena Complex devices in build must be at the ''Basset (NCaaS-R) Completion'' step and cannot be ''On Hold'', found these ticket types: IP Request'
+            - 'All devices in the Ciena Complex must have an IPv6 IP, these do not: MRTTGAMAOL0030338381, MRTTGAMAOL0030338382, MRTTGAMAOL0030338383, MRTTGAMAOL0030338384, MRTTGAMAOL0030338385, MRTTGAMAOL0030338386, MRTTGAMAOL0030338387, MRTTGAMAOL0030338388, MRTTGAMAOL003033838A, MRTTGAMAOL003033838B'
+            - 'All 5164 OLTs in the Ciena Complex must have an IPv4 IP, these do not: MRTTGAMAOL0030338381, MRTTGAMAOL0030338382, MRTTGAMAOL0030338383, MRTTGAMAOL0030338384, MRTTGAMAOL0030338385, MRTTGAMAOL0030338386, MRTTGAMAOL0030338387, MRTTGAMAOL0030338388'
+      title: complexAvailability
+      description: Describes the availablity of the complex for checkout
+      x-stoplight:
+        id: 1effb1fec4412
+    ComplexDetails:
+      type: object
+      properties:
+        ciena_complex_name:
+          type: string
+        complex_devices:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              production_date:
+                type: string
+              device_status:
+                type: string
+              device_type_id:
+                type: integer
+              device_type:
+                type: string
+              device_type_config:
+                type: string
+              available_configs:
+                type: string
+              device_address:
+                type: string
+              da_psa:
+                type: string
+              ipv4_mgmt:
+                type: string
+              ipv6_mgmt:
+                type: string
+        BNG:
+          type: array
+          items:
+            type: object
+            properties:
+              lid:
+                type: string
+              device_type_id:
+                type: integer
+              device_type:
+                type: string
+              ipv4_mgmt:
+                type: string
+        NCaaS_R:
+          type: array
+          items:
+            type: object
+            properties:
+              Checked_Out_By:
+                type: string
+              Checked_Out_Date:
+                type: string
+              Checked_In_Date:
+                type: string
+              Checkout_Details:
+                type: string
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              a_end_device_type:
+                type: string
+              a_end_device:
+                type: string
+              a_end_port:
+                type: string
+              granite_p_circ_path_inst_id:
+                type: integer
+              granite_work_order_name:
+                type: string
+              granite_ckt_path_name:
+                type: string
+              granite_ckt_path_status:
+                type: string
+              z_end_port:
+                type: string
+              z_end_device:
+                type: string
+              z_end_device_type:
+                type: string
+      x-examples:
+        Example 1:
+          ciena_complex_name: MRTTGAMAOL003033838Z
+          complex_devices:
+            - name: MRTTGAMAOL003033838A
+              production_date: null
+              device_status: build
+              device_type_id: 30
+              device_type: 8110 TOR
+              device_type_config: tor_8110
+              available_configs: tor_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: N/A - IPv6 Only
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL003033838B
+              production_date: null
+              device_status: build
+              device_type_id: 30
+              device_type: 8110 TOR
+              device_type_config: tor_8110
+              available_configs: tor_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: N/A - IPv6 Only
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338381
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338382
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338383
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338384
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338385
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338386
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338387
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+            - name: MRTTGAMAOL0030338388
+              production_date: null
+              device_status: build
+              device_type_id: 31
+              device_type: 5164 OLT
+              device_type_config: olt_5164
+              available_configs: olt_cli_base
+              device_address: '37 POWDER SPRINGS ST SE, GA'
+              da_psa: null
+              ipv4_mgmt: null
+              ipv6_mgmt: null
+          BNG:
+            - lid: MRTTGAMA0BW020976766LSW03
+              device_type_id: 1
+              device_type: BNG
+              ipv4_mgmt: 75.29.13.134
+          NCaaS_R:
+            - Checked_Out_By: lr3921
+              Checked_Out_Date: '2023-05-23T10:56:06.420'
+              Checked_In_Date: '2023-05-23T12:46:29.347'
+              Checkout_Details: 'Existing NCaaS-R Checkout - The ''MRTTGAMAOL003033838Z'' Ciena Complex was checked out by lr3921 on May 23 2023 10:56AM (Central Time).  Additionally, this site was checked in (completed) on May 23 2023 12:46PM (Central Time)'
+          links:
+            - a_end_device_type: BNG
+              a_end_device: MRTTGAMA0BW020976766LSW03
+              a_end_port: 01-01-C1-01
+              granite_p_circ_path_inst_id: 64047452
+              granite_work_order_name: LS1036191
+              granite_ckt_path_name: 101LG/GE100/MRTTGAMA0BW/MRTTGAMAOL0
+              granite_ckt_path_status: Pending Add
+              z_end_port: TOR-100-5
+              z_end_device: MRTTGAMAOL003033838A
+              z_end_device_type: 8110 TOR
+            - a_end_device_type: BNG
+              a_end_device: MRTTGAMA0BW020976766LSW03
+              a_end_port: 01-01-C2-01
+              granite_p_circ_path_inst_id: 64047460
+              granite_work_order_name: LS1036197
+              granite_ckt_path_name: 103LG/GE100/MRTTGAMA0BW/MRTTGAMAOL0
+              granite_ckt_path_status: Pending Add
+              z_end_port: TOR-100-6
+              z_end_device: MRTTGAMAOL003033838A
+              z_end_device_type: 8110 TOR
+            - a_end_device_type: BNG
+              a_end_device: MRTTGAMA0BW020976766LSW03
+              a_end_port: 01-01-C4-01
+              granite_p_circ_path_inst_id: 64047454
+              granite_work_order_name: LS1036192
+              granite_ckt_path_name: 102LG/GE100/MRTTGAMA0BW/MRTTGAMAOL0
+              granite_ckt_path_status: Pending Add
+              z_end_port: TOR-100-5
+              z_end_device: MRTTGAMAOL003033838B
+              z_end_device_type: 8110 TOR
+            - a_end_device_type: BNG
+              a_end_device: MRTTGAMA0BW020976766LSW03
+              a_end_port: 01-01-C3-01
+              granite_p_circ_path_inst_id: 64048606
+              granite_work_order_name: null
+              granite_ckt_path_name: 104LG/GE100/MRTTGAMA0BW/MRTTGAMAOL0
+              granite_ckt_path_status: Pending Add
+              z_end_port: TOR-100-6
+              z_end_device: MRTTGAMAOL003033838B
+              z_end_device_type: 8110 TOR
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-7
+              granite_p_circ_path_inst_id: 64048745
+              granite_work_order_name: null
+              granite_ckt_path_name: 101TT/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL003033838B
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: TOR-100-7
+              z_end_device: MRTTGAMAOL003033838B
+              z_end_device_type: 8110 TOR
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-8
+              granite_p_circ_path_inst_id: 64048746
+              granite_work_order_name: null
+              granite_ckt_path_name: 102TT/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL003033838B
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: TOR-100-8
+              z_end_device: MRTTGAMAOL003033838B
+              z_end_device_type: 8110 TOR
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-9
+              granite_p_circ_path_inst_id: 64048600
+              granite_work_order_name: null
+              granite_ckt_path_name: 101TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338381
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-9
+              granite_p_circ_path_inst_id: 64048602
+              granite_work_order_name: null
+              granite_ckt_path_name: 101TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338381
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-10
+              granite_p_circ_path_inst_id: 64048603
+              granite_work_order_name: null
+              granite_ckt_path_name: 102TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338382
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-10
+              granite_p_circ_path_inst_id: 64048605
+              granite_work_order_name: null
+              granite_ckt_path_name: 102TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338382
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-11
+              granite_p_circ_path_inst_id: 64048607
+              granite_work_order_name: null
+              granite_ckt_path_name: 103TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338383
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-11
+              granite_p_circ_path_inst_id: 64048609
+              granite_work_order_name: null
+              granite_ckt_path_name: 103TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338383
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-12
+              granite_p_circ_path_inst_id: 64048610
+              granite_work_order_name: null
+              granite_ckt_path_name: 104TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338384
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-12
+              granite_p_circ_path_inst_id: 64048612
+              granite_work_order_name: null
+              granite_ckt_path_name: 104TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338384
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-13
+              granite_p_circ_path_inst_id: 64048613
+              granite_work_order_name: null
+              granite_ckt_path_name: 105TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338385
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-13
+              granite_p_circ_path_inst_id: 64048615
+              granite_work_order_name: null
+              granite_ckt_path_name: 105TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338385
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-14
+              granite_p_circ_path_inst_id: 64048619
+              granite_work_order_name: null
+              granite_ckt_path_name: 106TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338386
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-14
+              granite_p_circ_path_inst_id: 64048621
+              granite_work_order_name: null
+              granite_ckt_path_name: 106TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338386
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-15
+              granite_p_circ_path_inst_id: 64048616
+              granite_work_order_name: null
+              granite_ckt_path_name: 107TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338387
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-15
+              granite_p_circ_path_inst_id: 64048618
+              granite_work_order_name: null
+              granite_ckt_path_name: 107TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338387
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838A
+              a_end_port: TOR-100-16
+              granite_p_circ_path_inst_id: 64048622
+              granite_work_order_name: null
+              granite_ckt_path_name: 108TS/GE100/MRTTGAMAOL003033838A/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-33
+              z_end_device: MRTTGAMAOL0030338388
+              z_end_device_type: 5164 OLT
+            - a_end_device_type: 8110 TOR
+              a_end_device: MRTTGAMAOL003033838B
+              a_end_port: TOR-100-16
+              granite_p_circ_path_inst_id: 64048624
+              granite_work_order_name: null
+              granite_ckt_path_name: 108TS/GE100/MRTTGAMAOL003033838B/MRTTGAMAOL0
+              granite_ckt_path_status: IE-In Effect
+              z_end_port: OLT-100-34
+              z_end_device: MRTTGAMAOL0030338388
+              z_end_device_type: 5164 OLT
+      description: Device complex details
+    ComplexConfigs:
+      type: object
+      x-examples:
+        Example 1:
+          complex_name: ABRYTXGIOL093999999Z
+          configs:
+            - device_type: tor_8110
+              config_type: tor_cli_base
+              config: '! Labrador Developer test config - to be validated by ATS'
+      properties:
+        complex_name:
+          type: string
+        configs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              device_type:
+                type: string
+              config_type:
+                type: string
+              config:
+                type: string
