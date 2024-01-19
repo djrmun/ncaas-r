@@ -1,0 +1,2676 @@
+openapi: 3.0.1
+x-stoplight:
+  id: 9v33vvalw7hrk
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: 'http://localhost:8080/tom'
+    description: Generated server url
+paths:
+  '/v1/variables/update/{turn}':
+    put:
+      tags:
+        - Variables
+      summary: 'Identify and retain the variables used by a template, given its TURN.'
+      description: |2-
+
+                    Assesses which variables the given template exposes and then retains the mapping between the template and the variables for optimized lookups.
+                    Any existing mappings are discarded before new mappings are created.
+                
+      operationId: updateVariableAssociationsForTemplate
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VariableAssociation'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VariableAssociation'
+  /v1/variables/setup:
+    put:
+      tags:
+        - Variables
+      summary: One time setup to identify and retain the variables used by all templates.
+      description: |2-
+
+                    This operation should really only be called once to establish all mappings between variables and templates.  Thereafter, the mappings are maintained by internal operations (create, update etc.)
+                
+      operationId: setup
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VariableAssociation'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VariableAssociation'
+  '/v1/template/{turn}/rename':
+    put:
+      tags:
+        - Template
+      summary: Rename template
+      description: Rename template and return root of new hierarchy
+      operationId: renameTemplate
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '501':
+          description: If template type is Sub; at present only Main templates can be renamed
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/{turn}/content':
+    get:
+      tags:
+        - Template
+      summary: Get a Template Content by TURN
+      description: Returns a Template
+      operationId: getTemplateContent
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            text/plain; charset=utf-8:
+              schema:
+                type: string
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: string
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: string
+    put:
+      tags:
+        - Template
+      summary: Update Template Content
+      description: Update Content of Template and Returns a Template
+      operationId: updateTemplateContent
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          text/plain;charset=utf-8:
+            schema:
+              type: string
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/{turn}':
+    get:
+      tags:
+        - Template
+      summary: Get a Template by TURN
+      description: Returns a Template
+      operationId: getTemplate
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+    put:
+      tags:
+        - Template
+      summary: Update template
+      description: Update template and return root of updated hierarchy
+      operationId: updateTemplate
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateUpdateContent'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+    delete:
+      tags:
+        - Template
+      summary: 'Delete a Template by TURN '
+      description: Delete Template
+      operationId: deleteTemplate
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/redraft/{turn}':
+    put:
+      tags:
+        - Template
+      summary: Redraft a template
+      description: Convert a template and its sub-templates hierarchy to drafts
+      operationId: redraft
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  /v1/template/purge:
+    put:
+      tags:
+        - Template
+      summary: Purge template hierarchies and associated resources
+      description: |2-
+
+                    Accepts optional regular expressions matching template TURN and status.  Type = Main is implied.
+                    Unless otherwise specified, all TURNs and all statuses match.
+                    Together these 3 selection predicates (2 explicit, 1 implied) isolate a set of main template hierarchies.
+                    A retention count identifies the number of newest revisions (by version) of each hierarchy to retain (default = 0).
+                    A cutoff date excludes any hierarchies with a modified time that is equal or later than the date given (default = NOW)
+                    The dryRun flag (default = true) controls whether to merely identify the TURNs to purge (dryRun = true) or to delete (dryRun = false).
+                    USE THIS API WITH EXTREME CAUTION!  UNLESS OTHERWISE CONSTRAINED, MERELY SETTING dryRun = false MAY RESULT IN DELETION OF ALL TEMPLATES!!
+                
+      operationId: purge
+      parameters:
+        - name: turnExpression
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: statusExpression
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: retain
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: cutoff
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: dryRun
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TURN'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TURN'
+  '/v1/template/link/{referrer}/{referred}':
+    put:
+      tags:
+        - Template
+      summary: Link a template (referred) and its children into a child relationship with another template (referrer)
+      description: |2-
+
+                    Accepts a referrer and a referred, both given as TURNs.  Construct a new hierarchy that is a composition of the hierarchy that the referrer
+                    was part of, such that, in the new hierarchy, the referrer is now in a parent / child relationship with the referred.  This is accomplished
+                    by "re-drafting" the referrer's hierarchy, from its root, and the portion of the referred hierarchy, the sub-tree rooted at the referred,
+                    then joining the two cloned hierarchies into a single composite hierarchy such that the clone of the referrer is now linked to the clone of
+                    the referred in the same fashion as when creating a child of another template.  A engine-specific include reference shall be injected into
+                    the referrer such that it includes the referred and all its children.
+                
+      operationId: link
+      parameters:
+        - name: referrer
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: referred
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '400':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/goLive/{turn}':
+    put:
+      tags:
+        - Template
+      summary: Take a template live
+      description: Promote a template to a live state
+      operationId: goLive
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/archive/{turn}':
+    put:
+      tags:
+        - Template
+      summary: Archive a template
+      description: Archives a template and its sub-templates hierarchy
+      operationId: archive
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/scope/{name}':
+    get:
+      tags:
+        - Scope
+      summary: Get a Scope by name
+      description: Returns Scope
+      operationId: getScopeByName
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseScope'
+        '404':
+          description: Scope does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+    put:
+      tags:
+        - Scope
+      summary: Update a Scope
+      description: Update and Returns a Scope
+      operationId: updateScope
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: x-auth-request-email
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScopeUpdateContent'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseScope'
+        '404':
+          description: Scope does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+    post:
+      tags:
+        - Scope
+      summary: Create a Scope
+      description: Create and Returns a Scope
+      operationId: createScope
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: x-auth-request-email
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScopeCreateContent'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseScope'
+        '409':
+          description: If an equivalently aliased scope (same metadata) already exists under a different name
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+    delete:
+      tags:
+        - Scope
+      summary: 'Delete a Scope by Name '
+      description: Delete Scope
+      operationId: deleteScope
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+        '404':
+          description: Scope does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseScope'
+  '/v1/blueprint-mapping/{blueprintName}/{blueprintVersion}':
+    get:
+      tags:
+        - Blueprint Mapping
+      summary: Get Templates associated with a Blueprint
+      description: Returns a list of associated TURNs for a given Blueprint Name and Blueprint Version.
+      operationId: getTurnsForBlueprintNameAndVersion
+      parameters:
+        - name: blueprintName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: blueprintVersion
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+    put:
+      tags:
+        - Blueprint Mapping
+      summary: Map Templates with associated Blueprint
+      description: Map a list of associated TURNs with given Blueprint Name and Blueprint Version.
+      operationId: doTemplateBlueprintMapping
+      parameters:
+        - name: blueprintName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: blueprintVersion
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateToBlueprintMappingModel'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateToBlueprintMappingModel'
+  '/v1/tom/variables/{engine}':
+    post:
+      tags:
+        - Template Operation Manager
+      summary: 'Identify variables used in a template, given the template engine type and template content'
+      description: Returns list of variables used in a given template.
+      operationId: variables
+      parameters:
+        - name: engine
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  '/v1/tom/testx/{turn}':
+    post:
+      tags:
+        - Template Operation Manager
+      summary: Test Template (variables expressed as serialized JSON or YAML)
+      description: Renders the template according to the semantics of the associated templating engine.  Intakes JSON or YAML block for variables
+      operationId: testExtended
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+          text/yaml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prototype'
+              example:
+                composition: Today is Sunday
+        '400':
+          description: Input violates variable schema
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Prototype'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Prototype'
+        '500':
+          description: Could not resolve Templates
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Prototype'
+  '/v1/tom/testx/raw/{turn}':
+    post:
+      tags:
+        - Template Operation Manager
+      summary: 'Test Template (variables expressed as serialized JSON or YAML, raw output)'
+      description: Renders the template according to the semantics of the associated templating engine.  Intakes JSON or YAML block for variables
+      operationId: testExtendedRawOutput
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+          text/yaml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            text/plain; charset=utf-8:
+              schema:
+                type: string
+              example: '{"composition":"Today is Sunday"}'
+        '400':
+          description: Input violates variable schema
+          content:
+            '*/*':
+              schema:
+                type: string
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: string
+        '500':
+          description: Could not resolve Templates
+          content:
+            '*/*':
+              schema:
+                type: string
+  '/v1/tom/test/{turn}':
+    post:
+      tags:
+        - Template Operation Manager
+      summary: Test Template
+      description: Renders the template according to the semantics of the associated templating engine.  Intakes list of key/value pairs for variables.
+      operationId: test
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/BoundVariable'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prototype'
+              example:
+                composition: Today is Sunday
+        '400':
+          description: Input violates variable schema
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Prototype'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Prototype'
+        '500':
+          description: Could not resolve Templates
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Prototype'
+      deprecated: true
+  '/v1/tom/test/raw/{turn}':
+    post:
+      tags:
+        - Template Operation Manager
+      summary: Test Template (raw output)
+      description: Renders the template according to the semantics of the associated templating engine.  Intakes list of key/value pairs for variables.
+      operationId: testRaw
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/BoundVariable'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            text/plain; charset=utf-8:
+              schema:
+                type: string
+              example: '{"composition":"Today is Sunday"}'
+        '400':
+          description: Input violates variable schema
+          content:
+            '*/*':
+              schema:
+                type: string
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: string
+        '500':
+          description: Could not resolve Templates
+          content:
+            '*/*':
+              schema:
+                type: string
+      deprecated: true
+  '/v1/template/{name}/{referrer}':
+    post:
+      tags:
+        - Template
+      summary: 'Create a Sub Template by Name, Type and Content'
+      description: Create and Returns a Template
+      operationId: createSubTemplate
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: referrer
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubTemplateCreateContent'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/{name}':
+    post:
+      tags:
+        - Template
+      summary: 'Create a Main Template by Name, Type and Content'
+      description: Create and Returns a Template
+      operationId: createMainTemplate
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-auth-request-id
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: x-auth-request-email
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateCreateContent'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/searchandfilter/{searchString}':
+    post:
+      tags:
+        - Search Template
+      summary: Search Template by search String and templates flag and then filter Template by criteria with optional ordering
+      description: Returns Templates
+      operationId: searchAndFilterTemplates
+      parameters:
+        - name: searchString
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: searchTemplates
+          in: query
+          required: true
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchAndFilterTemplatesRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Did not find any Templates
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+  /v1/template/import:
+    post:
+      tags:
+        - Import/Export
+      summary: Import template hierarchies
+      description: |2-
+
+                    Accepts the content payload that represents the previous emission of an export operation.
+                    Imported templates should retain their exported user principal identities, dates, and versions.
+                    The identifiers (id) are subject to change.
+                    If an exported scope is found to be defined (by name) in the target, the target's scope is used
+                    without further resolution.  This can potentially lead to loss of fidelity in the alias, description,
+                    metadata, user principals and dates.  If the scope is not defined in the target then all exported
+                    scope attributes are reproduced in the target.
+                    An attempt to import a previous export to the same target, will result in 409 collision errors.
+                
+      operationId: import
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportExportModel'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExportModel'
+        '409':
+          description: One of more template collisions (duplicate TURN) have occurred
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ImportExportModel'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ImportExportModel'
+  /v1/template/filter:
+    post:
+      tags:
+        - Search Template
+      summary: Filter Template by criteria with optional ordering
+      description: Returns Templates
+      operationId: filterTemplates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterTemplatesRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Did not find any Templates
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+  /v1/template/:
+    get:
+      tags:
+        - Template
+      summary: Get All Template
+      description: Returns Templates
+      operationId: searchAll
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+    post:
+      tags:
+        - Template
+      summary: Get Templates and Content by List of TURNS
+      description: Return List of Templates and Content
+      operationId: getTemplates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/variables/variable/{variable}':
+    get:
+      tags:
+        - Variables
+      summary: Obtain this list of template TURNs that are associated with the given variable.
+      description: |2-
+
+                    A variable may be associated with one or more templates.  This API returns the list of template TURNs that identify a template or template that contains usage of the given variable.
+                
+      operationId: getAssociationsForVariable
+      parameters:
+        - name: variable
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TURN'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TURN'
+  '/v1/variables/template/{turn}':
+    get:
+      tags:
+        - Variables
+      summary: 'Obtain this list of variables associated with a template, given its TURN'
+      description: |2-
+
+                    A variable may be associated with one or more templates.  This API returns the list of variables referenced in the template identified by the given TURN.
+                
+      operationId: getAssociationsForTemplate
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  '/v1/tom/variables/{turn}':
+    get:
+      tags:
+        - Template Operation Manager
+      summary: 'Identify variables used in a template, given the template URN (TURN)'
+      description: Returns list of variables used in a given template.
+      operationId: variables_1
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Did not find any Template for the given TURN
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  /v1/tom/package:
+    get:
+      tags:
+        - Template Operation Manager
+      summary: Package template hierarchies
+      description: |2-
+
+                    Accepts regular expressions matching template TURN.
+                    Typically this is given as the explicit TURN of the main template in the hierarchy to be used for packaging.
+                    Type = Main is implied.
+                    An optional nameTransform may be specified, if given the transform is applied to each template name and any references
+                    to other templates that are found in the content.
+                    The following transforms are supported:
+                        %n name
+                        %v version
+                        %t type
+                        %e engine
+                        %s status
+                        %b modifiedBy
+                        %B createdBy
+                        %S scope (meta-data-key)
+                        %T TURN
+                
+      operationId: package
+      parameters:
+        - name: turn
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: nameTransform
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: No Main templates can be found using the given criteria (turn).
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Package'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Package'
+  '/v1/tom/hierarchy/{turn}':
+    get:
+      tags:
+        - Template Operation Manager
+      summary: Get Template Hierarchy by Main Template name
+      description: Return resolved template hierarchy
+      operationId: getTemplateHierarchy
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateHierarchy'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TemplateHierarchy'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TemplateHierarchy'
+  '/v1/tom/extract/{turn}':
+    get:
+      tags:
+        - Template Operation Manager
+      summary: Extract Variable And Child Templates From Template Hierarchy
+      description: Identify each template by TURN and provide list of the referenced templates and referenced variables for each.
+      operationId: extract
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateReferencesModel'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateReferencesModel'
+        '500':
+          description: Could not resolve Templates
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateReferencesModel'
+  '/v1/tom/explode/{turn}':
+    get:
+      tags:
+        - Template Operation Manager
+      summary: Explode Template
+      description: 'Returns template with any ''child'' templates embedded, but variable references intact.'
+      operationId: explode
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+              example: '{ "composition" : "Today is $day}"'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        '500':
+          description: Could not resolve Templates
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+  '/v1/template/tree/{turn}':
+    get:
+      tags:
+        - Template
+      summary: Get Template Tree by Main Template name
+      description: Return mapped template hierarchy
+      operationId: tree
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateTree'
+        '404':
+          description: Template does not exist
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TemplateTree'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TemplateTree'
+  '/v1/template/search/{searchString}':
+    get:
+      tags:
+        - Search Template
+      summary: Search Template by search String and templates flag
+      description: Returns Templates
+      operationId: searchTemplates
+      parameters:
+        - name: searchString
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: searchTemplates
+          in: query
+          required: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '404':
+          description: Did not find any Templates
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/roots/{turn}':
+    get:
+      tags:
+        - Template
+      summary: Identify all root (main) templates for a given template TURN
+      description: Returns main (root) templates
+      operationId: roots
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+  '/v1/template/root/{turn}':
+    get:
+      tags:
+        - Template
+      summary: Identify root (main) template for a given template TURN
+      description: Returns single main (root) template (iff there is only one root)
+      operationId: root
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseTemplate'
+  /v1/template/list:
+    get:
+      tags:
+        - Search Template
+      summary: List Templates using paging and sorting
+      description: Returns Templates
+      operationId: listTemplates
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: orderBy
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            default:
+              - updated
+        - name: direction
+          in: query
+          required: true
+          schema:
+            type: string
+            default: DESC
+            enum:
+              - ASC
+              - DESC
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageImplRestResponseTemplate'
+  /v1/template/listqualified:
+    get:
+      tags:
+        - Search Template
+      summary: 'List Templates qualified by scope pattern, name pattern and type using paging and sorting'
+      description: Returns Templates
+      operationId: listQualifiedTemplates
+      parameters:
+        - name: scope
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: updatedBy
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - Sub
+              - Main
+        - name: includeContent
+          in: query
+          required: true
+          schema:
+            type: boolean
+            default: false
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: orderBy
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            default:
+              - updated
+        - name: direction
+          in: query
+          required: true
+          schema:
+            type: string
+            default: DESC
+            enum:
+              - ASC
+              - DESC
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseTemplate'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageImplRestResponseTemplate'
+  /v1/template/export:
+    get:
+      tags:
+        - Import/Export
+      summary: Export template hierarchies
+      description: |2-
+
+                    Accepts optional regular expressions matching template TURN and status.  Type = Main is implied.
+                    Unless otherwise specified, all TURNs and all statuses match.
+                    Together these 3 selection predicates (2 explicit, 1 implied) isolate a set of main template hierarchies.
+                    A retention count identifies the number of newest revisions (by version) of each hierarchy to retain (default = 0).
+                    A cutoff date excludes any hierarchies with a modified time that is equal or later than the date given (default = NOW)
+                
+      operationId: export
+      parameters:
+        - name: turnExpression
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: statusExpression
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: retain
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: cutoff
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExportModel'
+        '404':
+          description: No Main templates can be found using the given criteria.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ImportExportModel'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ImportExportModel'
+  /v1/scope/:
+    get:
+      tags:
+        - Scope
+      summary: Get All Scopes
+      description: Returns Scopes
+      operationId: searchAll_1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseScope'
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseScope'
+  '/v1/schema/{turn}':
+    get:
+      tags:
+        - Schema
+      summary: Get a template schema by TURN
+      description: Returns template schema
+      operationId: getSchema
+      parameters:
+        - name: turn
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: composite
+          in: query
+          required: true
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestResponseScope'
+        '404':
+          description: Template and/or schema does not exist
+          content:
+            '*/*':
+              schema:
+                type: string
+        '500':
+          description: Operation failed due to an internal error
+          content:
+            '*/*':
+              schema:
+                type: string
+components:
+  schemas:
+    TURN:
+      required:
+        - engine
+        - name
+        - scope
+        - version
+      type: object
+      properties:
+        engine:
+          type: string
+        scope:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+      x-stoplight:
+        id: fiuhztm3b8ns3
+    VariableAssociation:
+      required:
+        - turn
+        - variable
+      type: object
+      properties:
+        variable:
+          type: string
+        turn:
+          $ref: '#/components/schemas/TURN'
+      x-stoplight:
+        id: r26yxndct8fs6
+    KeyValue:
+      required:
+        - key
+        - value
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      x-stoplight:
+        id: arij0nl8srw4i
+    RestResponseTemplate:
+      required:
+        - createdBy
+        - createdDate
+        - engine
+        - id
+        - name
+        - scope
+        - status
+        - turn
+        - type
+        - version
+      type: object
+      properties:
+        turn:
+          type: string
+        name:
+          type: string
+        engine:
+          type: string
+        version:
+          type: string
+        id:
+          type: integer
+          format: int64
+        hash:
+          type: string
+        locator:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum:
+            - Archived
+            - Draft
+            - Live
+        updateNotes:
+          type: string
+        notes:
+          type: string
+        type:
+          type: string
+          enum:
+            - Sub
+            - Main
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+        createdDate:
+          type: string
+          format: date-time
+        modifiedDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+        scope:
+          $ref: '#/components/schemas/Scope'
+      x-stoplight:
+        id: 1rjimbs5gdf2e
+    Scope:
+      required:
+        - alias
+        - createdDate
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        alias:
+          type: string
+        locator:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        modifiedDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+        emails:
+          type: array
+          items:
+            type: string
+      x-stoplight:
+        id: zkxi7dx6xmz3s
+    MetaDataInput:
+      required:
+        - key
+        - value
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      x-stoplight:
+        id: 5n7ezlp7lsr0q
+    TemplateUpdateContent:
+      type: object
+      properties:
+        content:
+          type: string
+        updateNotes:
+          type: string
+        notes:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDataInput'
+      x-stoplight:
+        id: z5xdwcohhgydw
+    ScopeUpdateContent:
+      type: object
+      properties:
+        description:
+          type: string
+        emails:
+          type: array
+          items:
+            type: string
+      x-stoplight:
+        id: z2ht6r5vsjwwc
+    RestResponseScope:
+      required:
+        - alias
+        - createdBy
+        - createdDate
+        - name
+      type: object
+      properties:
+        locator:
+          type: string
+        name:
+          type: string
+        alias:
+          type: string
+        description:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        modifiedDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        emails:
+          type: array
+          items:
+            type: string
+      x-stoplight:
+        id: 55w8ijzcg7tj3
+    TemplateToBlueprintMappingModel:
+      required:
+        - blueprintName
+        - blueprintVersion
+        - templateId
+      type: object
+      properties:
+        mappingId:
+          type: integer
+          format: int64
+        templateId:
+          type: integer
+          format: int64
+        blueprintName:
+          type: string
+        blueprintVersion:
+          type: string
+        workflowActions:
+          type: string
+      x-stoplight:
+        id: 2pvnjwm77as5e
+    Prototype:
+      required:
+        - resolved
+        - unresolved
+      type: object
+      properties:
+        resolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolvedTemplateReference'
+        unresolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnresolvedTemplateReference'
+        composition:
+          type: string
+      x-stoplight:
+        id: 4pw7gndtz2o6p
+    ResolvedTemplateReference:
+      required:
+        - bindings
+        - referrers
+        - turn
+      type: object
+      properties:
+        turn:
+          $ref: '#/components/schemas/TURN'
+        hash:
+          type: string
+        locator:
+          type: string
+        referrers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TURN'
+        bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolvedVariable'
+        status:
+          type: string
+      x-stoplight:
+        id: q2jt2k4qe9fvk
+    ResolvedVariable:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        type:
+          type: string
+        schema:
+          type: string
+        locations:
+          type: array
+          items:
+            type: integer
+            format: int32
+      x-stoplight:
+        id: im70r5fwvv5jv
+    UnresolvedTemplateReference:
+      required:
+        - reference
+        - referrers
+      type: object
+      properties:
+        reference:
+          type: string
+        referrers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TURN'
+      x-stoplight:
+        id: ah36sieezg51s
+    BoundVariable:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+      x-stoplight:
+        id: ig6xg886b3ckp
+    SubTemplateCreateContent:
+      type: object
+      properties:
+        content:
+          type: string
+        updateNotes:
+          type: string
+        notes:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDataInput'
+      x-stoplight:
+        id: 9l1t76wtc9iqo
+    ScopeCreateContent:
+      type: object
+      properties:
+        description:
+          type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDataInput'
+        emails:
+          type: array
+          items:
+            type: string
+      x-stoplight:
+        id: k7rlqo3bub0l4
+    TemplateCreateContent:
+      required:
+        - engine
+      type: object
+      properties:
+        content:
+          type: string
+        engine:
+          type: string
+        updateNotes:
+          type: string
+        notes:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaDataInput'
+        scopeName:
+          type: string
+        scope:
+          $ref: '#/components/schemas/ScopeCreateContent'
+      x-stoplight:
+        id: ht462507m6pdz
+    MetadataFilterContent:
+      required:
+        - key
+        - valueFilter
+      type: object
+      properties:
+        key:
+          type: string
+        valueFilter:
+          type: string
+      x-stoplight:
+        id: xshtnswmx81rw
+    SearchAndFilterTemplatesRequest:
+      required:
+        - filterCriteria
+      type: object
+      properties:
+        filterCriteria:
+          $ref: '#/components/schemas/TemplateFilterContent'
+        orderBy:
+          type: string
+      x-stoplight:
+        id: ykydewr9jahuc
+    TemplateFilterContent:
+      type: object
+      properties:
+        nameFilter:
+          type: string
+        scopeFilter:
+          type: string
+        engineFilter:
+          type: string
+        versionFilter:
+          type: string
+        notesFilter:
+          type: string
+        typeFilter:
+          type: string
+        statusFilter:
+          type: string
+        createdByFilter:
+          type: string
+        updatedByFilter:
+          type: string
+        tagsFilter:
+          type: array
+          items:
+            type: string
+        metadataFilter:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataFilterContent'
+      x-stoplight:
+        id: y0wt2s4w6b70a
+    ImportExportModel:
+      required:
+        - templates
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateModel'
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/PairLongLong'
+      x-stoplight:
+        id: jneus4h5evwsw
+    PairLongLong:
+      required:
+        - first
+        - second
+      type: object
+      properties:
+        first:
+          type: integer
+          format: int64
+        second:
+          type: integer
+          format: int64
+      x-stoplight:
+        id: b48ogjm6c41bd
+    ScopeModel:
+      required:
+        - alias
+        - createdBy
+        - createdDate
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        alias:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        emails:
+          type: array
+          items:
+            type: string
+        createdDate:
+          type: string
+          format: date-time
+        modDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+      x-stoplight:
+        id: m8nssxlq02yg3
+    TemplateModel:
+      required:
+        - createdBy
+        - createdDate
+        - engine
+        - name
+        - status
+        - turn
+        - type
+        - version
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        turn:
+          $ref: '#/components/schemas/TURN'
+        engine:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        type:
+          type: string
+          enum:
+            - Sub
+            - Main
+        status:
+          type: string
+          enum:
+            - Archived
+            - Draft
+            - Live
+        updateNotes:
+          type: string
+        notes:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        modDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+        content:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        scope:
+          $ref: '#/components/schemas/ScopeModel'
+      x-stoplight:
+        id: 2rf6ppyb1nzir
+    FilterTemplatesRequest:
+      required:
+        - filterCriteria
+      type: object
+      properties:
+        turnList:
+          type: array
+          items:
+            type: string
+        filterCriteria:
+          $ref: '#/components/schemas/TemplateFilterContent'
+        orderBy:
+          type: string
+      x-stoplight:
+        id: bnet0lhann5op
+    Package:
+      required:
+        - resolved
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Template'
+        resolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolvedTemplateReference'
+      x-stoplight:
+        id: ffj1pnuhpkla8
+    Template:
+      required:
+        - createdDate
+        - engine
+        - name
+        - scope
+        - status
+        - turn
+        - type
+        - version
+      type: object
+      properties:
+        turn:
+          $ref: '#/components/schemas/TURN'
+        engine:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        hash:
+          type: string
+        locator:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum:
+            - Archived
+            - Draft
+            - Live
+        updateNotes:
+          type: string
+        notes:
+          type: string
+        type:
+          type: string
+          enum:
+            - Sub
+            - Main
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+        createdDate:
+          type: string
+          format: date-time
+        modifiedDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+        scope:
+          $ref: '#/components/schemas/Scope'
+      x-stoplight:
+        id: edq4t5zpcphdu
+    TemplateHierarchy:
+      required:
+        - resolved
+        - unresolved
+      type: object
+      properties:
+        resolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolvedTemplateReference'
+        unresolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnresolvedTemplateReference'
+      x-stoplight:
+        id: dwr0pkgm2glum
+    TemplateReferencesModel:
+      required:
+        - templateReferences
+        - variableReferences
+      type: object
+      properties:
+        turn:
+          $ref: '#/components/schemas/TURN'
+        templateReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/TURN'
+        variableReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolvedVariable'
+      x-stoplight:
+        id: rs4w0vvd7rifz
+    TemplateRelationship:
+      type: object
+      properties:
+        parent:
+          $ref: '#/components/schemas/TURN'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TURN'
+      x-stoplight:
+        id: z51iboleas8jb
+    TemplateTree:
+      type: object
+      properties:
+        root:
+          $ref: '#/components/schemas/TURN'
+        relationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateRelationship'
+      x-stoplight:
+        id: 9khth8jyo0sld
+    PageImplRestResponseTemplate:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestResponseTemplate'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        last:
+          type: boolean
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        first:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
+      x-stoplight:
+        id: lmm0spxvp3nba
+    PageableObject:
+      type: object
+      properties:
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        offset:
+          type: integer
+          format: int64
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+      x-stoplight:
+        id: 210ya08ao83ns
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+      x-stoplight:
+        id: wraymhkv3czac
